@@ -25,7 +25,9 @@ class SplashVC: UIViewController {
         
         view.backgroundColor = .init(hex: "#FCF6EF")
         
-        viewModel.onSplash()
+        print("VIEW DID LOAD")
+        
+        viewModel.fetchUser()
     }
     
     // Check for token, if no token go to 

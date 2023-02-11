@@ -9,15 +9,19 @@ import UIKit
 
 class MainController: UINavigationController {
     
-    convenience init() {
-        let viewModel = SplashVCViewModel()
-        let splashVC = SplashVC(viewModel: viewModel)
-        self.init(rootViewController: splashVC)
-        viewModel.controller = self
-    }
+    private var toast: Toast?
     
-    override init(rootViewController: UIViewController) {
-        super.init(rootViewController: rootViewController)
+    let userManager = UserManager()
+    
+    let authAPI = AuthAPI()
+    
+    let userAPI = UserAPI()
+    
+    init() {
+        let splashVM = SplashVCViewModel()
+        let splashVC = SplashVC(viewModel: splashVM)
+        super.init(rootViewController: splashVC)
+        splashVM.controller = self
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -29,10 +33,29 @@ class MainController: UINavigationController {
         self.isNavigationBarHidden = true
     }
     
-    // MARK: - Methods
-    
+    func showToast(withMessage message: String) {
+        guard let view = self.topViewController?.view else {
+            return
+        }
+        
+        toast?.hide()
+        toast = Toast(in: view)
+        toast!.set(withMessage: message)
+        toast!.show()
+    }
+}
+
+// MARK: - Navigation
+extension MainController {
     func goToAuth() {
-        let authVC = AuthVC()
+        let authVM = AuthVCViewModel(controller: self)
+        let authVC = AuthVC(viewModel: authVM)
         self.pushViewController(authVC, animated: true)
+    }
+    
+    func goToHome() {
+        let homeVM = HomeVCViewModel(controller: self)
+        let homeVC = HomeVC(viewModel: homeVM)
+        self.pushViewController(homeVC, animated: true)
     }
 }

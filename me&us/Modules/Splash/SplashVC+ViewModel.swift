@@ -11,11 +11,26 @@ class SplashVCViewModel {
     
     var controller: MainController?
     
-    func onSplash() {
-        guard let token = KeychainInterface.retrieve(key: "auth_token") else {
-            print("NO TOKEN!")
-            controller?.goToAuth()
-            return
+    func fetchUser() {
+        guard let controller = controller else {
+            fatalError("AuthController was not instantiated")
+        }
+        
+        Task {
+            let result = await controller.userAPI.fetchUser()
+            print(result)
+            switch result {
+            case .success(let user):
+                controller.userManager.user.send(user)
+                await controller.goToHome()
+            case .failure(let error):
+                switch error {
+                case .userError:
+                    await controller.goToAuth()
+                default:
+                    await controller.showToast(withMessage: "Internal server error")
+                }
+            }
         }
     }
 }
