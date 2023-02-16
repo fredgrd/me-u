@@ -20,4 +20,9 @@ extension NSRegularExpression {
            let range = NSRange(location: 0, length: string.utf16.count)
            return firstMatch(in: string, options: [], range: range) != nil
        }
+    
+    func replace(_ string: String, with template: String) -> String {
+        let range = NSRange(location: 0, length: string.utf16.count)
+        return stringByReplacingMatches(in: string, range: range, withTemplate: template)
+    }
 }

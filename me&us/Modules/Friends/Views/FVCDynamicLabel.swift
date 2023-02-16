@@ -1,5 +1,5 @@
 //
-//  DynamicLabel.swift
+//  FVCDynamicLabel.swift
 //  me&us
 //
 //  Created by Federico on 08/02/23.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-class DynamicLabel: UIView {
+class FVCDynamicLabel: UIView {
     
     private let staticText: String
     
@@ -56,7 +56,7 @@ class DynamicLabel: UIView {
 }
 
 // MARK: - UISetup
-private extension DynamicLabel {
+private extension FVCDynamicLabel {
     func setupUI() {
         setupStaticLabel()
         setupDynamicLabel()
@@ -64,7 +64,7 @@ private extension DynamicLabel {
     
     func setupStaticLabel() {
         staticLabel.font = .font(ofSize: 17, weight: .bold)
-        staticLabel.textColor = .primaryText
+        staticLabel.textColor = .primaryLightText
         staticLabel.text = staticText
         staticLabel.translatesAutoresizingMaskIntoConstraints = false
         staticLabelRxConstraint = staticLabel.rightAnchor.constraint(equalTo: rightAnchor)

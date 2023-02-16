@@ -17,7 +17,7 @@ final class KeychainInterface {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
-            kSecValueData as String: valueData
+            kSecValueData as String: valueData as Any
         ]
         
         let status = SecItemAdd(query as CFDictionary, nil)

@@ -9,6 +9,11 @@ import Foundation
 
 class HomeVCViewModel {
     
+    enum PageKind: Hashable {
+        case user
+        case friend
+    }
+    
     let controller: MainController
     
     // Variables

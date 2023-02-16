@@ -18,6 +18,7 @@ struct User: Codable {
     let name: String
     let number: String
     let avatar_url: String
+    let status: String
     let friends: [UserFriendDetails]
     let created_at: String
 }

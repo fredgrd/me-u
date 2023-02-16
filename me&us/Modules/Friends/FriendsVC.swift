@@ -24,14 +24,15 @@ class FriendsVC: UIViewController {
     private var bag = Set<AnyCancellable>()
     
     // Subviews
-    private let navigationBar = UIView()
+    private let draggableBar = UIView()
     private let titleBar = UIView()
-    private let dynamicSubtitle = DynamicLabel(staticText: "Add your ")
-    private let searchBar = UIView()
-    private let searchField = UITextField()
+    private let dynamicSubtitle = FVCDynamicLabel(staticText: "Add your ")
     
     private var collectionView: UICollectionView!
     private var dataSource: DataSource!
+    
+    private let permissionRequest = UIView()
+    private let permissionButton = PrimaryButton()
     
     // Init
     init(viewModel: FriendsVCViewModel) {
@@ -48,18 +49,24 @@ class FriendsVC: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupDataSource()
-        
-        Task {
-            print("ABOUT TO UPDATE CONTACS")
-            await viewModel.updateContactsModel()
-            print("ABOUT TO UPDATE REQUEST")
-            await viewModel.updateRequestsModel()
-        }
-        
         bindUI()
     }
     
     private func bindUI() {
+        viewModel.contactsAuthorizationStatus.receive(on: DispatchQueue.main).sink { authorization in
+            switch authorization {
+            case .authorized:
+                self.permissionRequest.isHidden = true
+                
+                Task {
+                    await self.viewModel.updateContactsModel()
+                    await self.viewModel.updateRequestsModel()
+                }
+            default:
+                self.permissionRequest.isHidden = false
+            }
+        }.store(in: &bag)
+        
         viewModel.models.receive(on: DispatchQueue.main).sink { models in
             var snapshot = Snapshot()
             
@@ -80,6 +87,10 @@ class FriendsVC: UIViewController {
             
             self.dataSource.apply(snapshot)
         }.store(in: &bag)
+        
+        permissionButton.onClick.receive(on: DispatchQueue.main).sink { button in
+            self.viewModel.requestContactsAccess()
+        }.store(in: &bag)
     }
     
     private func setupDataSource() {
@@ -93,8 +104,30 @@ class FriendsVC: UIViewController {
                 guard let user = self.viewModel.controller.userManager.user.value else {
                     fatalError("Failed to retrieve user")
                 }
-                
+        
                 cell.update(request, kind: request.to == user.number ? .received : .sent)
+                
+                cell.cancelAction = { button in
+                    if button.isSpinning { return }
+                    button.showSpinner()
+                    
+                    Task {
+                        await self.viewModel.updateRequest(request.id, update: .reject)
+                    }
+                    
+                    button.hideSpinner()
+                }
+                
+                cell.acceptAction = { button in
+                    if button.isSpinning { return }
+                    button.showSpinner()
+                    
+                    Task {
+                        await self.viewModel.updateRequest(request.id, update: .accept)
+                    }
+                    
+                    button.hideSpinner()
+                }
                 
                 return cell
             }
@@ -107,7 +140,7 @@ class FriendsVC: UIViewController {
                 
                 cell.update(withContact: contact)
                 
-                cell.addButton.onClick.receive(on: DispatchQueue.main).sink { button in
+                cell.addAction = { button in
                     if button.isSpinning { return }
                     button.showSpinner()
                     
@@ -120,8 +153,7 @@ class FriendsVC: UIViewController {
                     }
                   
                     button.hideSpinner()
-    
-                }.store(in: &self.bag)
+                }
                 
                 return cell
             }
@@ -160,21 +192,22 @@ class FriendsVC: UIViewController {
     private func sendTextInvite(_ to: String) {
         if (MFMessageComposeViewController.canSendText()) {
             let controller = MFMessageComposeViewController()
-            controller.body = ""
+            controller.body = "I want to add you me&u. Tap the link to accept 💛 https://meus.com"
             controller.recipients = [to] //Here goes whom you wants to send the message
-            controller.messageComposeDelegate = self as? MFMessageComposeViewControllerDelegate
+            controller.messageComposeDelegate = self
             self.present(controller, animated: true, completion: nil)
         }
         //This is just for testing purpose as when you run in the simulator, you cannot send the message.
         else{
-            print("Cannot send the message")
+            viewModel.controller.showToast(withMessage: "Cannot send text")
         }
-        func messageComposeViewController(controller:
-                                          MFMessageComposeViewController!, didFinishWithResult result: MessageComposeResult) {
-            //Displaying the message screen with animation.
-            self.dismiss(animated: true, completion: nil)
-        }
-        
+    }
+}
+
+// MARK: - MFMessageComposeViewController
+extension FriendsVC: MFMessageComposeViewControllerDelegate {
+    func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
+        self.dismiss(animated: true, completion: nil)
     }
 }
 
@@ -191,23 +224,23 @@ private extension FriendsVC {
         view.backgroundColor = .primaryBackground
         view.layer.cornerRadius = 40
         
-        setupNavigationBar()
+        setupDraggableBar()
         setupTitleBar()
         setupDynamicSubtitle()
-        setupSearchBar()
         setupCollectionView()
+        setupPermissionRequest()
     }
     
-    func setupNavigationBar() {
-        navigationBar.backgroundColor = nil
-        navigationBar.translatesAutoresizingMaskIntoConstraints = false
+    func setupDraggableBar() {
+        draggableBar.backgroundColor = nil
+        draggableBar.translatesAutoresizingMaskIntoConstraints = false
         let constraints = [
-            navigationBar.leftAnchor.constraint(equalTo: view.leftAnchor),
-            navigationBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            navigationBar.rightAnchor.constraint(equalTo: view.rightAnchor),
-            navigationBar.heightAnchor.constraint(equalToConstant: 30)]
+            draggableBar.leftAnchor.constraint(equalTo: view.leftAnchor),
+            draggableBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            draggableBar.rightAnchor.constraint(equalTo: view.rightAnchor),
+            draggableBar.heightAnchor.constraint(equalToConstant: 30)]
         
-        view.addSubview(navigationBar)
+        view.addSubview(draggableBar)
         NSLayoutConstraint.activate(constraints)
         
         let dragbar = UIView()
@@ -215,8 +248,8 @@ private extension FriendsVC {
         dragbar.backgroundColor = .secondaryDarkText
         dragbar.translatesAutoresizingMaskIntoConstraints = false
         let dragbarConstraints = [
-            dragbar.centerXAnchor.constraint(equalTo: navigationBar.centerXAnchor),
-            dragbar.centerYAnchor.constraint(equalTo: navigationBar.centerYAnchor),
+            dragbar.centerXAnchor.constraint(equalTo: draggableBar.centerXAnchor),
+            dragbar.centerYAnchor.constraint(equalTo: draggableBar.centerYAnchor),
             dragbar.heightAnchor.constraint(equalToConstant: 5),
             dragbar.widthAnchor.constraint(equalToConstant: 34)]
         
@@ -228,7 +261,7 @@ private extension FriendsVC {
         titleBar.translatesAutoresizingMaskIntoConstraints = false
         let constraints = [
             titleBar.leftAnchor.constraint(equalTo: view.leftAnchor),
-            titleBar.topAnchor.constraint(equalTo: navigationBar.bottomAnchor),
+            titleBar.topAnchor.constraint(equalTo: draggableBar.bottomAnchor),
             titleBar.rightAnchor.constraint(equalTo: view.rightAnchor),
             titleBar.heightAnchor.constraint(equalToConstant: 50)]
         
@@ -237,7 +270,7 @@ private extension FriendsVC {
         
         let titleLabel = UILabel()
         titleLabel.font = .font(ofSize: 21, weight: .bold)
-        titleLabel.textColor = .primaryText
+        titleLabel.textColor = .primaryLightText
         titleLabel.textAlignment = .center
         titleLabel.text = "Pick your best friends"
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -270,34 +303,6 @@ private extension FriendsVC {
         }
     }
     
-    func setupSearchBar() {
-        searchBar.layer.cornerRadius = 17
-        searchBar.backgroundColor = .secondaryBackground
-        searchBar.translatesAutoresizingMaskIntoConstraints = false
-        let barConstraints = [
-            searchBar.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 16),
-            searchBar.topAnchor.constraint(equalTo: dynamicSubtitle.bottomAnchor, constant: 25),
-            searchBar.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -16),
-            searchBar.heightAnchor.constraint(equalToConstant: 50)]
-        
-        view.addSubview(searchBar)
-        NSLayoutConstraint.activate(barConstraints)
-        
-        searchField.font = .font(ofSize: 17, weight: .semibold)
-        searchField.textColor = .primaryText
-        searchField.textAlignment = .center
-        searchField.attributedPlaceholder = NSAttributedString(string: "Add a new friend", attributes: [.font: UIFont.font(ofSize: 17, weight: .semibold), .foregroundColor: UIColor.primaryText])
-        searchField.translatesAutoresizingMaskIntoConstraints = false
-        let fieldConstraints = [
-            searchField.leftAnchor.constraint(equalTo: searchBar.leftAnchor, constant: 12),
-            searchField.topAnchor.constraint(equalTo: searchBar.topAnchor),
-            searchField.rightAnchor.constraint(equalTo: searchBar.rightAnchor, constant: -12),
-            searchField.bottomAnchor.constraint(equalTo: searchBar.bottomAnchor)]
-        
-        searchBar.addSubview(searchField)
-        NSLayoutConstraint.activate(fieldConstraints)
-    }
-    
     func setupCollectionView() {
         let layout = UICollectionViewFlowLayout()
         layout.itemSize = CGSize(width: view.frame.width, height: 75)
@@ -313,11 +318,87 @@ private extension FriendsVC {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         let constraints = [
             collectionView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            collectionView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 2),
+            collectionView.topAnchor.constraint(equalTo: dynamicSubtitle.bottomAnchor, constant: 5),
             collectionView.rightAnchor.constraint(equalTo: view.rightAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)]
         
         view.addSubview(collectionView)
         NSLayoutConstraint.activate(constraints)
+    }
+    
+    func setupPermissionRequest() {
+        permissionRequest.isHidden = true
+        permissionRequest.backgroundColor = .primaryBackground
+        permissionRequest.translatesAutoresizingMaskIntoConstraints = false
+        let constraints = [
+            permissionRequest.leftAnchor.constraint(equalTo: view.leftAnchor),
+            permissionRequest.topAnchor.constraint(equalTo: dynamicSubtitle.bottomAnchor, constant: 5),
+            permissionRequest.rightAnchor.constraint(equalTo: view.rightAnchor),
+            permissionRequest.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ]
+        
+        view.addSubview(permissionRequest)
+        NSLayoutConstraint.activate(constraints)
+        
+        let messageContainer = UIView()
+        messageContainer.translatesAutoresizingMaskIntoConstraints = false
+        let containerConstraints = [
+            messageContainer.topAnchor.constraint(equalTo: permissionRequest.topAnchor, constant: 100),
+            messageContainer.centerXAnchor.constraint(equalTo: permissionRequest.centerXAnchor),
+            messageContainer.widthAnchor.constraint(equalToConstant: 250)]
+        
+        permissionRequest.addSubview(messageContainer)
+        NSLayoutConstraint.activate(containerConstraints)
+        
+        // Card
+        let card = UIImageView()
+        card.image = UIImage(named: "contact-card@65pt")
+        card.translatesAutoresizingMaskIntoConstraints = false
+        let cardConstraints = [
+            card.topAnchor.constraint(equalTo: messageContainer.topAnchor),
+            card.centerXAnchor.constraint(equalTo: messageContainer.centerXAnchor)]
+        
+        messageContainer.addSubview(card)
+        NSLayoutConstraint.activate(cardConstraints)
+        
+        let title = UILabel()
+        title.font = .font(ofSize: 21, weight: .bold)
+        title.text = "Import your contacts"
+        title.textColor = .primaryLightText
+        title.textAlignment = .center
+        title.translatesAutoresizingMaskIntoConstraints = false
+        let titleConstraints = [
+            title.leftAnchor.constraint(equalTo: messageContainer.leftAnchor),
+            title.topAnchor.constraint(equalTo: card.bottomAnchor, constant: 20),
+            title.rightAnchor.constraint(equalTo: messageContainer.rightAnchor)]
+        
+        messageContainer.addSubview(title)
+        NSLayoutConstraint.activate(titleConstraints)
+        
+        let subtitle = UILabel()
+        subtitle.font = .font(ofSize: 15, weight: .medium)
+        subtitle.text = "Me&u never saves your contacts or texts friends on your behalf"
+        subtitle.textColor = .secondaryLightText
+        subtitle.textAlignment = .center
+        subtitle.numberOfLines = 0
+        subtitle.translatesAutoresizingMaskIntoConstraints = false
+        let subtitleConstraints = [
+            subtitle.leftAnchor.constraint(equalTo: messageContainer.leftAnchor),
+            subtitle.topAnchor.constraint(equalTo: title.bottomAnchor, constant: 10),
+            subtitle.rightAnchor.constraint(equalTo: messageContainer.rightAnchor)]
+        
+        messageContainer.addSubview(subtitle)
+        NSLayoutConstraint.activate(subtitleConstraints)
+        
+        permissionButton.title = "Continue"
+        permissionButton.translatesAutoresizingMaskIntoConstraints = false
+        let permissionButtonConstraints = [
+            permissionButton.topAnchor.constraint(equalTo: subtitle.bottomAnchor, constant: 20),
+            permissionButton.centerXAnchor.constraint(equalTo: messageContainer.centerXAnchor),
+            permissionButton.bottomAnchor.constraint(equalTo: messageContainer.bottomAnchor)
+           ]
+        
+        messageContainer.addSubview(permissionButton)
+        NSLayoutConstraint.activate(permissionButtonConstraints)
     }
 }

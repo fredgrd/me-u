@@ -7,7 +7,7 @@
 
 import UIKit
 
-@main
+@UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
@@ -17,8 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let mainVC = MainController()
         window?.rootViewController = mainVC
         window?.makeKeyAndVisible()
-        
-        
+            
         HTTPCookieStorage.shared.cookieAcceptPolicy = .always
         print(HTTPCookieStorage.shared.cookies(for: URL(string: "https://api.dinolab.one")!))
         return true
@@ -26,5 +25,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
 
-}
+} 
 

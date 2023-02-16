@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import Contacts
 import PhoneNumberKit
+import UIKit
 
 class FriendsVCViewModel {
     
@@ -22,6 +23,7 @@ class FriendsVCViewModel {
     
     let contactStore = CNContactStore()
     var contacts = [Contact]()
+    let contactsAuthorizationStatus: CurrentValueSubject<CNAuthorizationStatus, Never>
     
     let models = CurrentValueSubject<FVCCollectionModels, Never>(FVCCollectionModels())
     
@@ -29,19 +31,40 @@ class FriendsVCViewModel {
     
     init(controller: MainController) {
         self.controller = controller
+        
+        contactsAuthorizationStatus = CurrentValueSubject<CNAuthorizationStatus, Never>(CNContactStore.authorizationStatus(for: .contacts))
     }
     
+    func requestContactsAccess() {
+        switch contactsAuthorizationStatus.value {
+        case .notDetermined:
+            contactStore.requestAccess(for: .contacts) { [weak self] complete, error in
+                let authStatus = CNContactStore.authorizationStatus(for: .contacts)
+                self?.contactsAuthorizationStatus.send(authStatus)
+            }
+        case .restricted, .denied:
+            guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
+                return
+            }
+            
+            if UIApplication.shared.canOpenURL(settingsUrl) {
+                UIApplication.shared.open(settingsUrl, completionHandler: { (success) in
+                    print("Settings opened: \(success)") // Prints true
+                })
+            }
+        case .authorized:
+            let authStatus = CNContactStore.authorizationStatus(for: .contacts)
+            self.contactsAuthorizationStatus.send(authStatus)
+        @unknown default:
+            fatalError("Unknown CNAuthorizationStatus")
+        }
+    }
+
     func addContact(_ contact: Contact) async {
         let result = await controller.userAPI.createFriendRequest(withTarget: contact.number)
         switch result {
-        case .success(let request):
-            let filteredContacts = contacts.filter({ $0.number != contact.number })
-            
-            // Filter requests
-            var models = models.value
-            models.sentRequests.append(request)
-            models.contacts = filteredContacts
-            self.models.send(models)
+        case .success(_):
+            await updateRequestsModel()
         case .failure(let error):
             switch error {
             case .userError:
@@ -53,7 +76,25 @@ class FriendsVCViewModel {
     }
     
     func updateRequest(_ id: String, update: FriendRequestUpdate) async {
-        
+        let updateResult = await controller.userAPI.updateFriendRequest(withID: id, update: update)
+        switch updateResult {
+        case .success(let update):
+            if (update == .accept) {
+                let userResult = await controller.userAPI.fetchUser()
+                switch userResult {
+                case .success(let user):
+                    controller.userManager.user.send(user)
+                    await updateContactsModel()
+                    await updateRequestsModel()
+                case .failure(_):
+                    await controller.showToast(withMessage: ToastErrorMessage.Generic.rawValue)
+                }
+            } else {
+                await updateRequestsModel()
+            }
+        case .failure(_):
+            await controller.showToast(withMessage: ToastErrorMessage.Generic.rawValue)
+        }
     }
     
     // Fetch models
@@ -61,7 +102,6 @@ class FriendsVCViewModel {
     // Requests
     // Contacts
     func updateContactsModel() async {
-        print("Updating contacts model")
         contacts = await fetchContacts()
         
         let parseContacts = await fetchParsedContacts(contacts.map({ $0.number }))
@@ -82,7 +122,6 @@ class FriendsVCViewModel {
         var models = models.value
         models.contacts = contacts
         self.models.send(models)
-        print("Done updating contacts model")
     }
     
     func updateRequestsModel() async {

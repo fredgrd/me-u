@@ -11,6 +11,10 @@ class SplashVC: UIViewController {
     
     private let viewModel: SplashVCViewModel
     
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+    
     init(viewModel: SplashVCViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -22,13 +26,31 @@ class SplashVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.backgroundColor = .init(hex: "#FCF6EF")
-        
-        print("VIEW DID LOAD")
-        
+        setupUI()
         viewModel.fetchUser()
     }
+}
+
+// MARK: - UISetup
+private extension SplashVC {
+    func setupUI() {
+        view.backgroundColor = .primaryBackground
+        setupLogo()
+    }
     
-    // Check for token, if no token go to 
+    func setupLogo() {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "me&u")
+        imageView.contentMode = .scaleAspectFit
+        imageView.tintColor = .white
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        let constraints = [
+            imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            imageView.heightAnchor.constraint(equalToConstant: 80),
+            imageView.widthAnchor.constraint(equalToConstant: 150)]
+        
+        view.addSubview(imageView)
+        NSLayoutConstraint.activate(constraints)
+    }
 }

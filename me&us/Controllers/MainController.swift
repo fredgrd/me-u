@@ -17,6 +17,8 @@ class MainController: UINavigationController {
     
     let userAPI = UserAPI()
     
+    let roomAPI = RoomAPI()
+    
     init() {
         let splashVM = SplashVCViewModel()
         let splashVC = SplashVC(viewModel: splashVM)
@@ -34,14 +36,18 @@ class MainController: UINavigationController {
     }
     
     func showToast(withMessage message: String) {
-        guard let view = self.topViewController?.view else {
-            return
+        if var topController = (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first?.rootViewController {
+            while let presentedViewController = topController.presentedViewController {
+                topController = presentedViewController
+            }
+            
+            if let view = topController.view {
+                toast?.hide()
+                toast = Toast(in: view)
+                toast!.set(withMessage: message)
+                toast!.show()
+            }
         }
-        
-        toast?.hide()
-        toast = Toast(in: view)
-        toast!.set(withMessage: message)
-        toast!.show()
     }
 }
 

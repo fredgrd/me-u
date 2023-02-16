@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 class FVCRequestCell: UICollectionViewCell {
     static let identifier = "FVCRequestCell"
@@ -16,6 +17,11 @@ class FVCRequestCell: UICollectionViewCell {
     }
     
     private var kind: Kind?
+    
+    private var bag = Set<AnyCancellable>()
+    
+    var acceptAction: ((_ button: IconButton) -> Void)?
+    var cancelAction: ((_ button: IconButton) -> Void)?
     
     // Subviews
     private let thumbnailContainer = UIView()
@@ -32,10 +38,29 @@ class FVCRequestCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        bindUI()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func bindUI() {
+        acceptButton.onClick.receive(on: DispatchQueue.main).sink { button in
+            guard let acceptAction = self.acceptAction else {
+                return
+            }
+            
+            acceptAction(button)
+        }.store(in: &bag)
+        
+        cancelButton.onClick.receive(on: DispatchQueue.main).sink { button in
+            guard let cancelAction = self.cancelAction else {
+                return
+            }
+            
+            cancelAction(button)
+        }.store(in: &bag)
     }
     
     func update(_ request: FriendRequest, kind: Kind) {
@@ -43,7 +68,7 @@ class FVCRequestCell: UICollectionViewCell {
         
         // Image setup
         if (kind == .received ? request.from_user.avatar_url : request.to_user.avatar_url) != "none" {
-            thumbnailImageView.loadFrom(URLAddress: kind == .received ? request.from_user.avatar_url : request.to_user.avatar_url)
+            thumbnailImageView.sd_setImage(with: URL(string: kind == .received ? request.from_user.avatar_url : request.to_user.avatar_url))
             thumbnailInitialLabel.isHidden = true
             thumbnailImageView.isHidden = false
         } else {
@@ -97,7 +122,7 @@ private extension FVCRequestCell {
         NSLayoutConstraint.activate(backgroundConstraints)
         
         thumbnailInitialLabel.font = .font(ofSize: 21, weight: .semibold)
-        thumbnailInitialLabel.textColor = .primaryText
+        thumbnailInitialLabel.textColor = .primaryLightText
         thumbnailInitialLabel.textAlignment = .center
         thumbnailInitialLabel.isHidden = true
         thumbnailInitialLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -145,7 +170,7 @@ private extension FVCRequestCell {
         NSLayoutConstraint.activate(nameConstraints)
         
         numberLabel.font = .font(ofSize: 15, weight: .medium)
-        numberLabel.textColor = .secondaryText
+        numberLabel.textColor = .secondaryLightText
         numberLabel.numberOfLines = 1
         numberLabel.translatesAutoresizingMaskIntoConstraints = false
         let numberConstraints = [

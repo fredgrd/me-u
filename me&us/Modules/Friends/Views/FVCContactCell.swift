@@ -6,9 +6,14 @@
 //
 
 import UIKit
+import Combine
 
 class FVCContactCell: UICollectionViewCell {
     static let identifier = "FVCContactCell"
+    
+    var addAction: ((_ button: FVCAddButton) -> Void)?
+    
+    private var bag = Set<AnyCancellable>()
 
     private var number: String?
     
@@ -20,15 +25,26 @@ class FVCContactCell: UICollectionViewCell {
     private let nameLabel = UILabel()
     private let numberLabel = UILabel()
     
-    let addButton = AddContactButton()
+    private let addButton = FVCAddButton()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        bindUI()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func bindUI() {
+        addButton.onClick.receive(on: DispatchQueue.main).sink { button in
+            guard let addAction = self.addAction else {
+                return
+            }
+            
+            addAction(button)
+        }.store(in: &bag)
     }
 
     func update(withContact contact: Contact) {
@@ -85,7 +101,7 @@ private extension FVCContactCell {
         NSLayoutConstraint.activate(backgroundConstraints)
         
         thumbnailInitialLabel.font = .font(ofSize: 21, weight: .semibold)
-        thumbnailInitialLabel.textColor = .primaryText
+        thumbnailInitialLabel.textColor = .primaryLightText
         thumbnailInitialLabel.textAlignment = .center
         thumbnailInitialLabel.isHidden = true
         thumbnailInitialLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -133,7 +149,7 @@ private extension FVCContactCell {
         NSLayoutConstraint.activate(nameConstraints)
         
         numberLabel.font = .font(ofSize: 15, weight: .medium)
-        numberLabel.textColor = .secondaryText
+        numberLabel.textColor = .secondaryLightText
         numberLabel.numberOfLines = 1
         numberLabel.translatesAutoresizingMaskIntoConstraints = false
         let numberConstraints = [

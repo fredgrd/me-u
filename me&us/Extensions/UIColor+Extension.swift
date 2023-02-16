@@ -8,14 +8,11 @@
 import UIKit
 
 extension UIColor {
-    
-    static let primaryText: UIColor = .init(hex: "#D9D9D9")
-    static let secondaryText: UIColor = .init(hex: "#A9A9A9")
-    
     static let primaryDarkText: UIColor = .init(hex: "#1F2021")
     static let secondaryDarkText: UIColor = .init(hex: "#5D5A57")
     
-    static let primaryLightText: UIColor = .init(hex: "#DFDFDE")
+    static let primaryLightText: UIColor = .init(hex: "#D9D9D9")
+    static let secondaryLightText: UIColor = .init(hex: "#A9A9A9")
     
     static let primaryBackground: UIColor = .init(hex: "#1F2021")
     static let secondaryBackground: UIColor = .init(hex: "#2A2B2F")

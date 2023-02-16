@@ -8,6 +8,6 @@
 import Foundation
 
 enum ToastErrorMessage: String {
-    case Generic = "Ops.. something went wrong"
+    case Generic = "Something went wrong"
     case InternalServer = "Internal server error"
 }

@@ -1,5 +1,5 @@
 //
-//  AddContactButton.swift
+//  FVCAddButton.swift
 //  me&us
 //
 //  Created by Federico on 09/02/23.
@@ -8,9 +8,9 @@
 import UIKit
 import Combine
 
-class AddContactButton: UIView {
+class FVCAddButton: UIView {
     
-    let onClick = PassthroughSubject<AddContactButton, Never>()
+    let onClick = PassthroughSubject<FVCAddButton, Never>()
     
     var isEnabled: Bool = true
     
@@ -62,6 +62,7 @@ class AddContactButton: UIView {
         }
         
         if (sender.state == .ended) {
+            print("LONGPRESS")
             alpha = 1
             onClick.send(self)
         }
@@ -69,7 +70,7 @@ class AddContactButton: UIView {
 }
 
 // MARK: - UISetup
-private extension AddContactButton {
+private extension FVCAddButton {
     func setupUI() {
         backgroundColor = .primaryHighlight
         

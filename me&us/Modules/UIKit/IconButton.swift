@@ -10,7 +10,7 @@ import Combine
 
 class IconButton: UIView {
     
-    let onClick = PassthroughSubject<UIGestureRecognizer.State, Never>()
+    let onClick = PassthroughSubject<IconButton, Never>()
     
     var isEnabled: Bool = true {
         didSet {
@@ -18,13 +18,19 @@ class IconButton: UIView {
         }
     }
     
+    var isSpinning: Bool = false
+    
     var image: UIImage? {
         didSet {
             iconView.image = image
         }
     }
     
-    var sendAllEvents: Bool = false
+    var imageTintColor: UIColor? {
+        didSet{
+            iconView.tintColor = imageTintColor
+        }
+    }
     
     // Subviews
     private let iconView = UIImageView()
@@ -45,12 +51,14 @@ class IconButton: UIView {
     }
     
     func showSpinner() {
+        isSpinning = true
         iconView.isHidden = true
         activityIndicatorView.isHidden = false
         activityIndicatorView.startAnimating()
     }
     
     func hideSpinner() {
+        isSpinning = false
         iconView.isHidden = false
         activityIndicatorView.isHidden = true
         activityIndicatorView.stopAnimating()
@@ -67,12 +75,7 @@ class IconButton: UIView {
         
         if (sender.state == .ended) {
             alpha = 1
-        }
-        
-        if (sendAllEvents) {
-            onClick.send(sender.state)
-        } else if (sender.state == .ended) {
-            onClick.send(.ended)
+            onClick.send(self)
         }
     }
 }
@@ -96,6 +99,7 @@ private extension IconButton {
     
     func setupActivityIndicatorView() {
         activityIndicatorView.isHidden = true
+        activityIndicatorView.color = .primaryLightText
         activityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
         let constaints = [
             activityIndicatorView.leftAnchor.constraint(equalTo: leftAnchor),

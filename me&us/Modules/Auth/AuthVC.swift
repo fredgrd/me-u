@@ -17,6 +17,10 @@ class AuthVC: UIViewController {
     
     private let alphaRegex = NSRegularExpression("[a-zA-Z]+")
     
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+    
     // Subscribers
     private var bag = Set<AnyCancellable>()
     
@@ -245,7 +249,7 @@ extension AuthVC: UITextFieldDelegate {
 // MARK: - UISetup
 private extension AuthVC {
     func setupUI() {
-        view.backgroundColor = .init(hex: "#FCF6EF")
+        view.backgroundColor = .primaryBackground
    
         setupNavigationBar()
         setupUserInputView()
@@ -270,6 +274,7 @@ private extension AuthVC {
         
         // Arrow left
         arrowLxBtn.image = UIImage(named: "arrow-lx@24pt")
+        arrowLxBtn.imageTintColor = .primaryLightText
         arrowLxBtn.alpha = 0
         arrowLxBtn.translatesAutoresizingMaskIntoConstraints = false
         let arrowLxConstraints = [
@@ -294,6 +299,7 @@ private extension AuthVC {
         
         // Arrow left
         arrowRxBtn.image = UIImage(named: "arrow-rx@24pt")
+        arrowRxBtn.imageTintColor = .primaryLightText
         arrowRxBtn.translatesAutoresizingMaskIntoConstraints = false
         let arrowRxConstraints = [
             arrowRxBtn.heightAnchor.constraint(equalToConstant: 44),
@@ -309,7 +315,7 @@ private extension AuthVC {
         label.font = .font(ofSize: 11, weight: .semibold)
         label.textAlignment = .center
         label.numberOfLines = 0
-        label.textColor = .dimGray
+        label.textColor = .primaryLightText
         label.text = "We will send a text with a verification code. Message and data rates may apply."
         
         disclaimerView.subviews.forEach {$0.removeFromSuperview()}
@@ -321,7 +327,7 @@ private extension AuthVC {
         label.font = .font(ofSize: 11, weight: .semibold)
         label.textAlignment = .center
         label.numberOfLines = 0
-        label.textColor = .dimGray
+        label.textColor = .primaryLightText
         label.text = "Code sent to \(viewModel.number ?? "")"
         
         disclaimerView.subviews.forEach {$0.removeFromSuperview()}
@@ -333,7 +339,7 @@ private extension AuthVC {
         label.font = .font(ofSize: 11, weight: .semibold)
         label.textAlignment = .center
         label.numberOfLines = 0
-        label.textColor = .dimGray
+        label.textColor = .primaryLightText
         label.text = "By tapping next, you are agreeing to our Terms of Service and Privacy Policy"
         
         disclaimerView.subviews.forEach {$0.removeFromSuperview()}
@@ -371,6 +377,7 @@ private extension AuthVC {
         numberTextField.font = .font(ofSize: 21, weight: .semibold)
         numberTextField.textColor = .white
         numberTextField.withExamplePlaceholder = true
+        numberTextField.keyboardAppearance = .dark
         numberTextField.isHidden = true
         numberTextField.translatesAutoresizingMaskIntoConstraints = false
         let constraints = [
@@ -391,6 +398,7 @@ private extension AuthVC {
         codeTextField.textColor = .white
         codeTextField.attributedPlaceholder = NSAttributedString(string: "123456", attributes: [.font: UIFont.font(ofSize: 21, weight: .semibold), .foregroundColor: UIColor.quickSilver])
         codeTextField.keyboardType = .numberPad
+        codeTextField.keyboardAppearance = .dark
         codeTextField.textContentType = .oneTimeCode
         codeTextField.isHidden = true
         codeTextField.translatesAutoresizingMaskIntoConstraints = false
@@ -411,6 +419,7 @@ private extension AuthVC {
         nameTextField.textAlignment = .center
         nameTextField.textColor = .white
         nameTextField.keyboardType = .namePhonePad
+        nameTextField.keyboardAppearance = .dark
         nameTextField.textContentType = .name
         nameTextField.isHidden = true
         nameTextField.translatesAutoresizingMaskIntoConstraints = false

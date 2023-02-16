@@ -26,7 +26,7 @@ class FVCSectionHeader: UICollectionReusableView {
     func update(withTitle title: String, icon: UIImage?) {
         titleLabel.text = title
         iconView.image = icon
-        iconView.tintColor = .primaryText
+        iconView.tintColor = .primaryLightText
     }
 }
 

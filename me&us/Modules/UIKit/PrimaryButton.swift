@@ -9,7 +9,7 @@ import UIKit
 import Combine
 
 class PrimaryButton: UIView {
-    let onClick = PassthroughSubject<UIGestureRecognizer.State, Never>()
+    let onClick = PassthroughSubject<PrimaryButton, Never>()
     
     var isEnabled: Bool = true {
         didSet {
@@ -17,13 +17,13 @@ class PrimaryButton: UIView {
         }
     }
     
+    var isSpinning: Bool = false
+    
     var title: String = "Primary Button" {
         didSet {
             titleLabel.text = title
         }
     }
-
-    var sendAllEvents: Bool = false
     
     // Subviews
     private let titleLabel = UILabel()
@@ -44,12 +44,14 @@ class PrimaryButton: UIView {
     }
     
     func showSpinner() {
+        isSpinning = true
         titleLabel.isHidden = true
         activityIndicatorView.isHidden = false
         activityIndicatorView.startAnimating()
     }
     
     func hideSpinner() {
+        isSpinning = false
         titleLabel.isHidden = false
         activityIndicatorView.isHidden = true
         activityIndicatorView.stopAnimating()
@@ -66,12 +68,7 @@ class PrimaryButton: UIView {
         
         if (sender.state == .ended) {
             alpha = 1
-        }
-        
-        if (sendAllEvents) {
-            onClick.send(sender.state)
-        } else if (sender.state == .ended) {
-            onClick.send(.ended)
+            onClick.send(self)
         }
     }
 }
@@ -79,21 +76,24 @@ class PrimaryButton: UIView {
 // MARK: - UISetup
 private extension PrimaryButton {
     func setupUI() {
-        backgroundColor = .lightSalmon
+        backgroundColor = .primaryHighlight
+        layer.cornerRadius = 22
         
         setupTitleLabel()
         setupActivityIndicatorView()
     }
     
     func setupTitleLabel() {
-        titleLabel.font = .font(ofSize: 21, weight: .semibold)
-        titleLabel.textColor = .white
+        titleLabel.font = .font(ofSize: 17, weight: .semibold)
+        titleLabel.textColor = .primaryDarkText
         titleLabel.numberOfLines = 1
         titleLabel.textAlignment = .center
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         let constraints = [
-            titleLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 35),
-            titleLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: -35),
+            titleLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 18),
+            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 12),
+            titleLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: -18),
+            titleLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -12),
             titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor)]
         
         addSubview(titleLabel)
@@ -102,12 +102,11 @@ private extension PrimaryButton {
     
     func setupActivityIndicatorView() {
         activityIndicatorView.isHidden = true
+        activityIndicatorView.color = .primaryDarkText
         activityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
         let constaints = [
-            activityIndicatorView.leftAnchor.constraint(equalTo: leftAnchor),
-            activityIndicatorView.topAnchor.constraint(equalTo: topAnchor),
-            activityIndicatorView.rightAnchor.constraint(equalTo: rightAnchor),
-            activityIndicatorView.bottomAnchor.constraint(equalTo: bottomAnchor)]
+            activityIndicatorView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            activityIndicatorView.centerYAnchor.constraint(equalTo: centerYAnchor)]
         
         addSubview(activityIndicatorView)
         NSLayoutConstraint.activate(constaints)
