@@ -322,6 +322,8 @@ private extension ChatVC {
         inputField.layer.cornerRadius = 15
         inputField.backgroundColor = .primaryBackground
         inputField.keyboardAppearance = .dark
+        inputField.layer.borderColor = UIColor.init(hex: "#555555").cgColor
+        inputField.layer.borderWidth = 1
         inputField.translatesAutoresizingMaskIntoConstraints = false
         let fieldConstraints = [
             inputField.leftAnchor.constraint(equalTo: footerBar.leftAnchor, constant: 16),
