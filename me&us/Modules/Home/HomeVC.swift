@@ -65,6 +65,10 @@ class HomeVC: UIViewController {
     }
     
     private func bindUI() {
+        menu.userProfileButton.onClick.receive(on: RunLoop.main).sink { _ in
+            self.viewModel.controller.goToProfile()
+        }.store(in: &bag)
+        
         menu.addFriendButton.onClick.receive(on: DispatchQueue.main).sink { _ in
             let friendsVM = FriendsVCViewModel(controller: self.viewModel.controller)
             let friendsVC = FriendsVC(viewModel: friendsVM)

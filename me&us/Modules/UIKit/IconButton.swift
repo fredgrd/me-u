@@ -27,8 +27,14 @@ class IconButton: UIView {
     }
     
     var imageTintColor: UIColor? {
-        didSet{
+        didSet {
             iconView.tintColor = imageTintColor
+        }
+    }
+    
+    var spinnerColor: UIColor? {
+        didSet {
+            activityIndicatorView.color = spinnerColor
         }
     }
     

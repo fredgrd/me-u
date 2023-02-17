@@ -95,10 +95,92 @@ final class UserAPI {
      
      - Parameter status: The status emoji.
      
-     - Returns: A new `Result<User?, APIError>`.
+     - Returns: A new `Result<User, APIError>`.
      */
     func updateStatus(withStatus status: String) async -> Result<User, APIError> {
         guard let url = URL(string: baseUrl+"/user/update-status"), let data = try? JSONEncoder().encode(["status": status]) else {
+            return .failure(.badURL)
+        }
+        
+        do {
+            var request = URLRequest(url: url)
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.addValue("application/json", forHTTPHeaderField: "Accept")
+            request.httpMethod = "PATCH"
+            request.httpBody = data
+            
+            let (responseData, response) = try await URLSession.shared.data(for: request)
+            guard let response = response as? HTTPURLResponse else {
+                return .failure(.badResponse)
+            }
+            
+            if (response.statusCode == 200) {
+                guard let user = try? JSONDecoder().decode(User.self, from: responseData) else {
+                    return .failure(.badResponse)
+                }
+                
+                return .success(user)
+            } else if (response.statusCode == 400) {
+                return .failure(.userError)
+            } else {
+                return .failure(.serverError)
+            }
+        } catch {
+            print("UserAPI/updateUser error: \(error)")
+            return .failure(.badRequest)
+       }
+    }
+    
+    /**
+     Update user avatar.
+     
+     - Parameter url: The avatar url.
+     
+     - Returns: A new `Result<User, APIError>`.
+     */
+    func updateAvatar(withURL avatarURL: String) async -> Result<User, APIError> {
+        guard let url = URL(string: baseUrl+"/user/update-avatar"), let data = try? JSONEncoder().encode(["avatar_url": avatarURL]) else {
+            return .failure(.badURL)
+        }
+        
+        do {
+            var request = URLRequest(url: url)
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.addValue("application/json", forHTTPHeaderField: "Accept")
+            request.httpMethod = "PATCH"
+            request.httpBody = data
+            
+            let (responseData, response) = try await URLSession.shared.data(for: request)
+            guard let response = response as? HTTPURLResponse else {
+                return .failure(.badResponse)
+            }
+            
+            if (response.statusCode == 200) {
+                guard let user = try? JSONDecoder().decode(User.self, from: responseData) else {
+                    return .failure(.badResponse)
+                }
+                
+                return .success(user)
+            } else if (response.statusCode == 400) {
+                return .failure(.userError)
+            } else {
+                return .failure(.serverError)
+            }
+        } catch {
+            print("UserAPI/updateUser error: \(error)")
+            return .failure(.badRequest)
+       }
+    }
+    
+    /**
+     Delete the friend from the user's friends.
+     
+     - Parameter id: The friend id.
+     
+     - Returns: A new `Result<User, APIError>`.
+     */
+    func deleteFriend(withID id: String) async -> Result<User, APIError> {
+        guard let url = URL(string: baseUrl+"/user/delete-friend"), let data = try? JSONEncoder().encode(["friend_id": id]) else {
             return .failure(.badURL)
         }
         

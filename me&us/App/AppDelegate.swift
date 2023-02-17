@@ -19,7 +19,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.makeKeyAndVisible()
             
         HTTPCookieStorage.shared.cookieAcceptPolicy = .always
-        print(HTTPCookieStorage.shared.cookies(for: URL(string: "https://api.dinolab.one")!))
         return true
     }
 

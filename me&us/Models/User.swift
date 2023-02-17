@@ -7,10 +7,11 @@
 
 import Foundation
 
-struct UserFriendDetails: Codable {
+struct UserFriendDetails: Codable, Hashable {
     let id: String
     let number: String
     let name: String
+    let avatar_url: String
 }
 
 struct User: Codable {

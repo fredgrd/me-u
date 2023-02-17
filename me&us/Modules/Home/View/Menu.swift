@@ -13,7 +13,7 @@ class Menu: UIView {
     let cxContainer = UIView()
     let rxContainer = UIView()
     
-    let userSettingsButton = IconButton()
+    let userProfileButton = IconButton()
     let userNotificationsButton = IconButton()
     let addFriendButton = HVCAddFriendButton()
     
@@ -74,18 +74,18 @@ private extension Menu {
     }
     
     private func setupUserSettingsButton() {
-        userSettingsButton.image = UIImage(named: "user@16pt")
-        userSettingsButton.backgroundColor = .secondaryBackground
-        userSettingsButton.layer.cornerRadius = 22
-        userSettingsButton.translatesAutoresizingMaskIntoConstraints = false
+        userProfileButton.image = UIImage(named: "user@16pt")
+        userProfileButton.backgroundColor = .secondaryBackground
+        userProfileButton.layer.cornerRadius = 22
+        userProfileButton.translatesAutoresizingMaskIntoConstraints = false
         let constraints = [
-            userSettingsButton.leftAnchor.constraint(equalTo: lxContainer.leftAnchor),
-            userSettingsButton.topAnchor.constraint(equalTo: lxContainer.topAnchor),
-            userSettingsButton.rightAnchor.constraint(equalTo: lxContainer.rightAnchor),
-            userSettingsButton.bottomAnchor.constraint(equalTo: lxContainer.bottomAnchor),
+            userProfileButton.leftAnchor.constraint(equalTo: lxContainer.leftAnchor),
+            userProfileButton.topAnchor.constraint(equalTo: lxContainer.topAnchor),
+            userProfileButton.rightAnchor.constraint(equalTo: lxContainer.rightAnchor),
+            userProfileButton.bottomAnchor.constraint(equalTo: lxContainer.bottomAnchor),
         ]
         
-        lxContainer.addSubview(userSettingsButton)
+        lxContainer.addSubview(userProfileButton)
         NSLayoutConstraint.activate(constraints)
     }
     
