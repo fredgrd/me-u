@@ -21,8 +21,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         HTTPCookieStorage.shared.cookieAcceptPolicy = .always
         return true
     }
-
-
-
+    
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        DeeplinkManager.shared.openUrl(url)
+        return true
+    }
 } 
 

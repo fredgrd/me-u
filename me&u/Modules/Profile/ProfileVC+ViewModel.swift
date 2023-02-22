@@ -6,51 +6,29 @@
 //
 
 import UIKit
-import Cloudinary
 
 class ProfileVCViewModel {
     
     let controller: MainController
-    
-    private let cloudinary: CLDCloudinary
-    
+
     init(controller: MainController) {
         self.controller = controller
-        let config = CLDConfiguration(cloudName: "degzh4mwt", apiKey: "381569676437882")
-        cloudinary = CLDCloudinary(configuration: config)
     }
     
     func uploadImage(_ image: UIImage) {
-        guard let imageData = image.pngData() else {
+        guard let imageData = image.jpegData(compressionQuality: 0.5) else {
             return
         }
         
-        let preprocessChain = CLDImagePreprocessChain().addStep(CLDPreprocessHelpers.limit(width: 300, height: 300))
-        
-        cloudinary.createUploader().upload(data: imageData, uploadPreset: "tbyqh1lp", preprocessChain: preprocessChain, completionHandler:  { [weak self] response, error in
-            guard let self = self else {
-                return
+        Task {
+            let result = await controller.userAPI.updateAvatar(imageData)
+            switch result {
+            case .success(let user):
+                controller.userManager.updateUser(user)
+            case .failure(_):
+                await controller.showToast(withMessage: "Avatar upload failed")
             }
-            
-            if error != nil {
-                self.controller.showToast(withMessage: "Image upload failed")
-                return
-            }
-            
-            if let url = response?.secureUrl {
-                Task {
-                    let result = await self.controller.userAPI.updateAvatar(withURL: url)
-                    switch result {
-                    case .success(let user):
-                        self.controller.userManager.user.send(user)
-                    case .failure(_):
-                        await self.controller.showToast(withMessage: ToastErrorMessage.Generic.rawValue)
-                    }
-                }
-            } else {
-                self.controller.showToast(withMessage: "Image upload failed")
-            }
-        })
+        }
     }
     
     func signout() {

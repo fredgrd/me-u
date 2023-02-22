@@ -49,6 +49,8 @@ class HomeVC: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         showFriendsVC()
+//        let vc = AudioTestVC()
+//        self.present(vc, animated: true)
     }
     
     private func showFriendsVC() {
@@ -76,12 +78,43 @@ class HomeVC: UIViewController {
             self.present(friendsVC, animated: true)
         }.store(in: &bag)
         
+        menu.userNotificationsButton.onClick.receive(on: RunLoop.main).sink { _ in
+            self.viewModel.presentNotificationsVC(from: self)
+        }.store(in: &bag)
+        
+        viewModel.controller.userManager.notifications.receive(on: RunLoop.main).sink { notifications in
+            let unreadCount = notifications.reduce(0) { partialResult, notification in
+                return partialResult + (notification.status == .sent ? 1 : 0)
+            }
+            self.menu.notificationCount = unreadCount
+        }.store(in: &bag)
+        
         viewModel.controller.userManager.user.receive(on: RunLoop.main).sink { user in
             guard let user = user else {
                 fatalError("Failed to retrieve user")
             }
             
             self.updateSnapshot(withUser: user)
+        }.store(in: &bag)
+        
+        DeeplinkManager.shared.urlToOpen.receive(on: RunLoop.main).sink { info in
+            guard let info = info else {
+                return
+            }
+            
+            if info.host == "home", let roomID = info.parameters["room_id"] {
+                Task {
+                    guard let room = await self.viewModel.fetchRoom(roomID) else {
+                        return
+                    }
+                    
+                    let chatVM = ChatVCViewModel(controller: self.viewModel.controller, room: room)
+                    let chatVC = ChatVC(viewModel: chatVM)
+                    self.presentedViewController?.dismiss(animated: false)
+                    self.present(chatVC, animated: true)
+                }
+//
+            }
         }.store(in: &bag)
     }
     

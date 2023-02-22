@@ -14,7 +14,7 @@ extension UINavigationController {
         transition.type = CATransitionType.push
         transition.subtype = CATransitionSubtype.fromLeft
         transition.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
-        view.window!.layer.add(transition, forKey: kCATransition)
+        view.layer.add(transition, forKey: kCATransition)
         pushViewController(controller, animated: false)
     }
     
@@ -35,6 +35,4 @@ extension UINavigationController {
         pushViewController(viewController, animated: animated)
         CATransaction.commit()
       }
-
-
 }

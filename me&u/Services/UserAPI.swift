@@ -138,38 +138,58 @@ final class UserAPI {
      
      - Returns: A new `Result<User, APIError>`.
      */
-    func updateAvatar(withURL avatarURL: String) async -> Result<User, APIError> {
-        guard let url = URL(string: baseUrl+"/user/update-avatar"), let data = try? JSONEncoder().encode(["avatar_url": avatarURL]) else {
-            return .failure(.badURL)
+    func updateAvatar(_ imageData: Data) async -> Result<User, APIError> {
+        let paramName: String = "imagefile"
+        guard let url = URL(string: baseUrl+"/user/update-avatar") else {
+            return .failure(APIError.badURL)
         }
         
+        // Set the URLRequest to POST and to the specified URL
+        var urlRequest = URLRequest(url: url)
+        
+        urlRequest.httpMethod = "PATCH"
+        
+        // Generate boundary string using a unique per-app string
+        let boundary = UUID().uuidString
+        
+        urlRequest.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+        // Construct the form data
+        var data = Data()
+        
+        data.append("\r\n--\(boundary)\r\n".data(using: .utf8)!)
+        data.append("Content-Disposition: form-data; name=\"\(paramName)\"; filename=\"image\"\r\n".data(using: .utf8)!)
+        data.append("Content-Type: image/png\r\n\r\n".data(using: .utf8)!)
+        
+        // Append image data
+        data.append(imageData)
+        
+        // Ending
+        data.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+        
+        urlRequest.httpBody = data
+        
         do {
-            var request = URLRequest(url: url)
-            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.addValue("application/json", forHTTPHeaderField: "Accept")
-            request.httpMethod = "PATCH"
-            request.httpBody = data
-            
-            let (responseData, response) = try await URLSession.shared.data(for: request)
+            let (responseData, response) = try await URLSession.shared.data(for: urlRequest)
             guard let response = response as? HTTPURLResponse else {
-                return .failure(.badResponse)
+                return .failure(APIError.badResponse)
             }
             
             if (response.statusCode == 200) {
                 guard let user = try? JSONDecoder().decode(User.self, from: responseData) else {
-                    return .failure(.badResponse)
+                    return .failure(APIError.badDecoding)
                 }
                 
                 return .success(user)
             } else if (response.statusCode == 400) {
-                return .failure(.userError)
+                return .failure(APIError.userError)
             } else {
-                return .failure(.serverError)
+                return .failure(APIError.serverError)
             }
         } catch {
-            print("UserAPI/updateUser error: \(error)")
+            print("RoomAPI/uploadImage error: \(error)")
             return .failure(.badRequest)
-       }
+        }
     }
     
     /**

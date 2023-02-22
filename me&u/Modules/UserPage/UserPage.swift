@@ -55,6 +55,19 @@ class UserPage: UIView {
             self.userStatusLabel.text = user.status
         }.store(in: &bag)
         
+        viewModel.controller.userManager.notifications.receive(on: RunLoop.main).sink { notifications in
+            let rooms = self.roomsDataSource.snapshot(for: .main).items
+            
+            for (index, room) in rooms.enumerated() {
+                let roomNotifications = notifications.filter({ $0.room_id == room.id })
+                let unreadCount = roomNotifications.reduce(0, { $0 + ($1.status == .sent ? 1 : 0)})
+                
+                if let cell = self.roomsCollection.cellForItem(at: IndexPath(row: index, section: 0)) as? UPRoomCell {
+                    cell.notificationsCount = unreadCount
+                }
+            }
+        }.store(in: &bag)
+        
         viewModel.rooms.receive(on: DispatchQueue.main).sink { rooms in
             var snapshot = Snapshot()
             
@@ -97,6 +110,8 @@ class UserPage: UIView {
             }
             
             cell.update(title: room.name, description: room.description)
+            
+            cell.notificationsCount = self.viewModel.unreadCount(forRoom: room.id)
             
             cell.dotsAction = {
                 guard let rect = self.roomsCollection.layoutAttributesForItem(at: indexPath) else {

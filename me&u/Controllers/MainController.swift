@@ -19,11 +19,17 @@ class MainController: UINavigationController {
     
     let roomAPI = RoomAPI()
     
+    let notificationAPI = NotificationAPI()
+    
     init() {
         let splashVM = SplashVCViewModel()
         let splashVC = SplashVC(viewModel: splashVM)
         super.init(rootViewController: splashVC)
         splashVM.controller = self
+        
+        Task {
+            await userManager.fetchNotifications()
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -104,5 +110,11 @@ extension MainController {
         let profileVM = ProfileVCViewModel(controller: self)
         let profileVC = ProfileVC(viewModel: profileVM)
         self.pushViewControllerFromLeft(controller: profileVC)
+    }
+    
+    func goToNotifications() {
+        let notificationsVM = NotificationsVCViewModel(controller: self)
+        let notificationsVC = NotificationsVC(viewModel: notificationsVM)
+        self.pushViewController(notificationsVC, animated: true)
     }
 }

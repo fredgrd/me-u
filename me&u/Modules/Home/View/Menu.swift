@@ -6,8 +6,15 @@
 //
 
 import UIKit
+import Combine
 
 class Menu: UIView {
+    
+    var notificationCount: Int = 0 {
+        didSet {
+            userNotificationIndicator.isHidden = notificationCount == 0
+        }
+    }
     
     let lxContainer = UIView()
     let cxContainer = UIView()
@@ -15,6 +22,7 @@ class Menu: UIView {
     
     let userProfileButton = IconButton()
     let userNotificationsButton = IconButton()
+    let userNotificationIndicator = UIView()
     let addFriendButton = HVCAddFriendButton()
     
     override init(frame: CGRect) {
@@ -103,6 +111,19 @@ private extension Menu {
         
         rxContainer.addSubview(userNotificationsButton)
         NSLayoutConstraint.activate(constraints)
+        
+        userNotificationIndicator.isHidden = true
+        userNotificationIndicator.layer.cornerRadius = 5
+        userNotificationIndicator.backgroundColor = .init(hex: "#EC133A")
+        userNotificationIndicator.translatesAutoresizingMaskIntoConstraints = false
+        let indicatorConstraints = [
+            userNotificationIndicator.topAnchor.constraint(equalTo: userNotificationsButton.topAnchor),
+            userNotificationIndicator.rightAnchor.constraint(equalTo: userNotificationsButton.rightAnchor),
+            userNotificationIndicator.heightAnchor.constraint(equalToConstant: 10),
+            userNotificationIndicator.widthAnchor.constraint(equalToConstant: 10)]
+        
+        rxContainer.addSubview(userNotificationIndicator)
+        NSLayoutConstraint.activate(indicatorConstraints)
     }
     
     private func setupAddFriendButton() {

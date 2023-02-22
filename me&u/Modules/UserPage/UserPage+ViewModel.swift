@@ -33,4 +33,13 @@ class UserPageViewModel {
             await self.controller.showToast(withMessage: ToastErrorMessage.Generic.rawValue)
         }
     }
+    
+    func unreadCount(forRoom id: String) -> Int {
+        let notifications = controller.userManager.notifications.value.filter({ $0.room_id == id })
+        let count = notifications.reduce(0) { partialResult, notification in
+            return partialResult + (notification.status == .sent ? 1 : 0)
+        }
+        
+        return count
+    }
 }

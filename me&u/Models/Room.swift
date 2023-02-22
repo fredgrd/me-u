@@ -19,6 +19,14 @@ struct Room: Codable, Hashable {
     let description: String
 }
 
+// Message
+
+enum RoomMessageKind: String, Codable {
+    case text = "text"
+    case audio = "audio"
+    case image = "image"
+}
+
 struct RoomMessage: Codable, Hashable {
     let id: String
     let sender: String
@@ -26,6 +34,7 @@ struct RoomMessage: Codable, Hashable {
     let sender_number: String
     let sender_thumbnail: String
     let message: String
+    let kind: RoomMessageKind
     let timestamp: String
 }
 

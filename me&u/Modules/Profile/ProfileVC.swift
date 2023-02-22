@@ -187,7 +187,7 @@ private extension ProfileVC {
         view.addSubview(headerBar)
         NSLayoutConstraint.activate(constraints)
         
-        goBackButton.image = UIImage(named: "right-arrow@24pt")
+        goBackButton.image = UIImage(named: "rx-arrow@24pt")
         goBackButton.tintColor = .primaryLightText
         goBackButton.backgroundColor = .secondaryBackground
         goBackButton.layer.cornerRadius = 22

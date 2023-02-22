@@ -26,8 +26,6 @@ final class WebSocketAPI: NSObject {
     
     var timer: Timer?
     
-    private let urlString = "wss://api.dinolab.one/websockets/room?"
-    
     override init() {
         // no-op
     }
@@ -36,9 +34,9 @@ final class WebSocketAPI: NSObject {
         timer?.invalidate()
     }
     
-    func subscribeToRoom(withID id: String, completion: @escaping ((SocketResult?) -> Void)) {
+    func subscribeToRoom(roomID room: String, userID user: String, completion: @escaping ((SocketResult?) -> Void)) {
         if !opened {
-            openWebSocket(id)
+            openWebSocket(roomID: room, userID: user)
         }
         
         guard let webSocket = webSocket else {
@@ -59,7 +57,7 @@ final class WebSocketAPI: NSObject {
                         completion(nil)
                     }
                     
-                    self?.subscribeToRoom(withID: id, completion: completion)
+                    self?.subscribeToRoom(roomID: room, userID: user, completion: completion)
                 default:
                     completion(nil)
                 }
@@ -74,10 +72,9 @@ final class WebSocketAPI: NSObject {
             return
         }
         
-        guard let data = try? JSONSerialization.data(withJSONObject: ["sender": message.sender, "sender_name": message.sender_name, "sender_number": message.sender_number, "sender_thumbnail": message.sender_thumbnail,  "message": message.message ], options: .prettyPrinted), let string = String(data: data, encoding: .utf8) else {
+        guard let data = try? JSONSerialization.data(withJSONObject: ["sender": message.sender, "sender_name": message.sender_name, "sender_number": message.sender_number, "sender_thumbnail": message.sender_thumbnail,  "message": message.message, "kind": message.kind.rawValue ], options: .prettyPrinted), let string = String(data: data, encoding: .utf8) else {
             return
         }
-        
         
         webSocket.send(URLSessionWebSocketTask.Message.string(string)) { error in
             if let error {
@@ -102,8 +99,8 @@ final class WebSocketAPI: NSObject {
         }
     }
     
-    private func openWebSocket(_ room: String) {
-        if let url = URL(string: urlString + room) {
+    private func openWebSocket(roomID room: String, userID user: String) {
+        if let url = URL(string: "wss://api.dinolab.one/websockets/room?room_id=\(room)&user_id=\(user)") {
             let request = URLRequest(url: url)
             let session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
             let webSocket = session.webSocketTask(with: request)
