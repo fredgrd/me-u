@@ -52,6 +52,11 @@ class CVCInputBar: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func resignFirstResponder() -> Bool {
+        inputField.resignFirstResponder()
+        return true
+    }
+    
     private func bindUI() {
         recordButton.onClick.receive(on: RunLoop.main).sink { [weak self] state in
             self?.handleRecordingState(state)

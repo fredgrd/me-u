@@ -12,6 +12,8 @@ enum APIError: Error {
     case badRequest
     case badResponse
     case badDecoding
+    case badEncoding
     case serverError
     case userError
+    case authError
 }

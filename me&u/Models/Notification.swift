@@ -12,6 +12,12 @@ enum NotificationStatus: String, Codable {
     case read = "read"
 }
 
+enum NotificationKind: String, Codable {
+    case text = "text"
+    case image = "image"
+    case audio = "audio"
+}
+
 struct Notification: Codable, Hashable {
     let id: String
     let room_id: String
@@ -23,6 +29,6 @@ struct Notification: Codable, Hashable {
     let fcm_id: String
     var status: NotificationStatus
     let message: String
-    let type: String
+    let kind: NotificationKind
     let timestamp: String
 }

@@ -17,18 +17,25 @@ class SplashVCViewModel {
         }
         
         Task {
-            let result = await controller.userAPI.fetchUser()
-            print(result)
+            let result = await controller.userManager.fetchUser()
             switch result {
-            case .success(let user):
-                controller.userManager.user.send(user)
-                await controller.goToHome()
-            case .failure(let error):
-                switch error {
-                case .userError:
-                    await controller.goToAuth()
-                default:
-                    await controller.showToast(withMessage: "Internal server error")
+            case .success:
+                checkAuth()
+            case .failure:
+                await controller.goToAuth()
+            }
+        }
+    }
+    
+    func checkAuth() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            if settings.authorizationStatus == .authorized {
+                DispatchQueue.main.async {
+                    self.controller!.goToHome()
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.controller!.goToAuthNotifications()
                 }
             }
         }

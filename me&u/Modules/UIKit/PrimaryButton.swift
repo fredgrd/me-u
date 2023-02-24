@@ -25,6 +25,12 @@ class PrimaryButton: UIView {
         }
     }
     
+    var titleColor: UIColor = .primaryDarkText {
+        didSet {
+            titleLabel.textColor = titleColor
+        }
+    }
+    
     // Subviews
     private let titleLabel = UILabel()
     private let activityIndicatorView = UIActivityIndicatorView()

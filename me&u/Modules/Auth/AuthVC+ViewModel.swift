@@ -48,42 +48,40 @@ class AuthVCViewModel {
         }
     }
     
-    func completeVerification(code: String) async {
+    func completeVerification(code: String) {
         guard let number = number else {
             return
         }
         
-        let result = await authAPI.completeVerification(withCode: code, number: number)
-        switch result {
-        case .success(let verificationResult):
-            if let user = verificationResult.user {
-                self.controller.userManager.user.send(user)
-                await self.controller.goToHome()
-            } else {
-                step.send(.name)
-            }
-        case .failure(let error):
-            switch error {
-            case .userError:
-                await controller.showToast(withMessage: "Invalid code")
-            default:
-                await controller.showToast(withMessage: "Internal server error")
+        Task {
+            let result = await authAPI.completeVerification(withCode: code, number: number)
+            switch result {
+            case .success(let verificationResult):
+                if let user = verificationResult.user {
+                    self.controller.userManager.updateUser(user)
+                    await self.controller.goToHome()
+                } else {
+                    step.send(.name)
+                }
+            case .failure(let error):
+                switch error {
+                case .userError:
+                    await controller.showToast(withMessage: "Invalid code")
+                default:
+                    await controller.showToast(withMessage: "Internal server error")
+                }
             }
         }
     }
     
-    func createUser(name: String) async {
-        let result = await userAPI.createUser(withName: name)
-        switch result {
-        case .success(let user):
-            self.controller.userManager.user.send(user)
-            await self.controller.goToHome()
-        case .failure(let error):
-            switch error {
-            case .userError:
-                await controller.showToast(withMessage: "Invalid name")
-            default:
-                await controller.showToast(withMessage: "Internal server error")
+    func createUser(name: String) {
+        Task {
+            let result = await controller.userManager.createUser(name)
+            switch result {
+            case .success:
+                await self.controller.goToHome()
+            case .failure:
+                await controller.showToast(withMessage: "Operation failed")
             }
         }
     }

@@ -16,6 +16,7 @@ struct UserFriendDetails: Codable, Hashable {
 
 struct User: Codable {
     let id: String
+    let fcm_token: String
     let name: String
     let number: String
     let avatar_url: String

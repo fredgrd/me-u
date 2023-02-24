@@ -27,6 +27,7 @@ class SplashVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        
         viewModel.fetchUser()
     }
 }

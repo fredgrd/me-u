@@ -50,7 +50,15 @@ class NVCNotificationCell: UICollectionViewCell {
         }
         
         nameLabel.text = "\(notification.sender_name) sent a message in \(notification.room_name)"
-        messageLabel.text = notification.message
+        
+        switch notification.kind {
+        case .text:
+            messageLabel.text = notification.message
+        case .image:
+            messageLabel.text = "Sent you an image"
+        case .audio:
+            messageLabel.text = "Sent you an audio"
+        }
     }
 }
 

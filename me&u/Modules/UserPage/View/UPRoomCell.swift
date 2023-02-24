@@ -13,21 +13,11 @@ class UPRoomCell: UICollectionViewCell {
     
     var dotsAction: (() -> Void)?
     
-    var notificationsCount: Int = 0 {
-        didSet {
-            print("NOTIFICATIONS!!!", notificationsCount)
-            unreadCountView.isHidden = notificationsCount == 0
-            unreadCountLabel.text = String(notificationsCount)
-        }
-    }
-    
     private var bag = Set<AnyCancellable>()
     
     private let dotsButton = IconButton()
     private let titleLabel = UILabel()
     private let descriptionLabel = UILabel()
-    private let unreadCountView = UIView()
-    private let unreadCountLabel = UILabel()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -38,12 +28,7 @@ class UPRoomCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        unreadCountView.isHidden = true
-    }
-    
+
     private func bindUI() {
         dotsButton.onClick.receive(on: DispatchQueue.main).sink { button in
             guard let dotsAction = self.dotsAction else {
@@ -69,7 +54,6 @@ private extension UPRoomCell {
         setupDotsButton()
         setupTitleLabel()
         setupDescriptionLabel()
-        setupUnreadCount()
     }
     
     func setupDotsButton() {
@@ -112,31 +96,5 @@ private extension UPRoomCell {
         
         contentView.addSubview(descriptionLabel)
         NSLayoutConstraint.activate(constraints)
-    }
-    
-    func setupUnreadCount() {
-        unreadCountView.isHidden = true
-        unreadCountView.layer.cornerRadius = 10
-        unreadCountView.backgroundColor = .init(hex: "#EC133A")
-        unreadCountView.translatesAutoresizingMaskIntoConstraints = false
-        let viewConstraints = [
-            unreadCountView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            unreadCountView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
-            unreadCountView.heightAnchor.constraint(equalToConstant: 24)]
-        
-        contentView.addSubview(unreadCountView)
-        NSLayoutConstraint.activate(viewConstraints)
-        
-        unreadCountLabel.font = .font(ofSize: 14, weight: .bold)
-        unreadCountLabel.textColor = .white
-        unreadCountLabel.textAlignment = .center
-        unreadCountLabel.translatesAutoresizingMaskIntoConstraints = false
-        let labelConstraints = [
-            unreadCountLabel.centerYAnchor.constraint(equalTo: unreadCountView.centerYAnchor),
-            unreadCountLabel.leftAnchor.constraint(equalTo: unreadCountView.leftAnchor, constant: 10),
-            unreadCountLabel.rightAnchor.constraint(equalTo: unreadCountView.rightAnchor, constant: -10)]
-        
-        unreadCountView.addSubview(unreadCountLabel)
-        NSLayoutConstraint.activate(labelConstraints)
     }
 }

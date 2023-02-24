@@ -383,9 +383,9 @@ private extension FriendsVC {
         subtitle.numberOfLines = 0
         subtitle.translatesAutoresizingMaskIntoConstraints = false
         let subtitleConstraints = [
-            subtitle.leftAnchor.constraint(equalTo: messageContainer.leftAnchor),
-            subtitle.topAnchor.constraint(equalTo: title.bottomAnchor, constant: 10),
-            subtitle.rightAnchor.constraint(equalTo: messageContainer.rightAnchor)]
+            subtitle.topAnchor.constraint(equalTo: title.bottomAnchor, constant: 14),
+            subtitle.rightAnchor.constraint(equalTo: messageContainer.rightAnchor),
+            subtitle.leftAnchor.constraint(equalTo: messageContainer.leftAnchor)]
         
         messageContainer.addSubview(subtitle)
         NSLayoutConstraint.activate(subtitleConstraints)

@@ -9,8 +9,10 @@ import Foundation
 
 final class UserAPI {
     
-    let baseUrl: String = "https://api.dinolab.one"
+    let coreAPI = CoreAPI()
     
+    let baseUrl: String = "https://api.dinolab.one"
+
     /**
      Creates a user.
 
@@ -18,8 +20,8 @@ final class UserAPI {
 
      - Returns: A new `Result<User, APIError>`.
      */
-    func createUser(withName name: String) async -> Result<User, APIError> {
-        guard let url = URL(string: baseUrl+"/user/create"), let data = try? JSONEncoder().encode(["name": name]) else {
+    func createUser(withName name: String, token: String) async -> Result<User, APIError> {
+        guard let url = URL(string: baseUrl+"/user/create"), let data = try? JSONEncoder().encode(["name": name, "fcm_token": token]) else {
             return .failure(.badURL)
         }
         
@@ -88,6 +90,22 @@ final class UserAPI {
             print("UserAPI/fetchUser error: \(error)")
             return .failure(.badRequest)
         }
+    }
+    
+    /**
+     Update FCM token.
+     
+     - Parameter token: The  new FCM token.
+     
+     - Returns: A new `Result<User, APIError>`.
+     */
+    func updateToken(withToken token: String) async -> Result<User, APIError> {
+        guard let data = try? JSONEncoder().encode(["fcm_token": token]) else {
+            return .failure(APIError.badEncoding)
+        }
+        
+        let result: Result<User, APIError> = await coreAPI.request(to: "/user/update-token", method: .PATCH, data: data)
+        return result
     }
     
     /**

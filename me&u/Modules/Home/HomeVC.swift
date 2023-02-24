@@ -49,8 +49,6 @@ class HomeVC: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         showFriendsVC()
-//        let vc = AudioTestVC()
-//        self.present(vc, animated: true)
     }
     
     private func showFriendsVC() {

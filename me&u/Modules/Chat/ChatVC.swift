@@ -34,12 +34,8 @@ class ChatVC: UIViewController {
     // Subviews
     private let draggableBar = UIView()
     private let headerBar = CVCHeader()
-    private let footerBar = UIView()
     private let inputBar = CVCInputBar()
     private var inputBarBotConstraint = NSLayoutConstraint()
-    private var footerBarBotConstraint = NSLayoutConstraint()
-    private let inputField = CVCInputField()
-    private let sendButton = IconButton()
     
     private var chatCollection: UICollectionView!
     private var chatDataSource: DataSource!
@@ -97,7 +93,7 @@ class ChatVC: UIViewController {
     }
     
     @objc private func viewOnClick() {
-        inputField.resignFirstResponder()
+        let _ = inputBar.resignFirstResponder()
     }
     
     private func setupObservers() {
@@ -145,21 +141,6 @@ class ChatVC: UIViewController {
             } else {
                 self.headerBar.hideTyping()
             }
-        }.store(in: &bag)
-        
-        //  Message sending
-        sendButton.onClick.receive(on: DispatchQueue.main).sink { button in
-            guard let text = self.inputField.text else {
-                return
-            }
-            
-            let cleanedText = self.whitespaceRegex.replace(text, with: "")
-
-            Task {
-                await self.viewModel.sendMessage(cleanedText, kind: .text)
-            }
-            
-            self.inputField.text = nil
         }.store(in: &bag)
         
         // Input bar
@@ -356,27 +337,6 @@ extension ChatVC: UIImagePickerControllerDelegate, UINavigationControllerDelegat
     }
 }
 
-// MARK: - UITextFieldDelegate
-extension ChatVC: UITextFieldDelegate {
-    func textFieldDidChangeSelection(_ textField: UITextField) {
-        guard let text = textField.text else {
-            sendButton.isEnabled = false
-            return
-        }
-    
-        let cleaned = whitespaceRegex.replace(text, with: "")
-        
-        if cleaned.count > 0 {
-            sendButton.isEnabled = true
-            Task {
-                await viewModel.sendUpdate()
-            }
-        } else {
-            sendButton.isEnabled = false
-        }
-    }
-}
-
 // MARK: - UIAdaptivePresentationControllerDelegate
 extension ChatVC: UIAdaptivePresentationControllerDelegate {
     func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
@@ -435,7 +395,6 @@ private extension ChatVC {
         
         setupDraggableBar()
         setupHeaderBar()
-//        setupFooterBar()
         setupInputBar()
         setupChatCollection()
         setupHeaderGradient()
@@ -504,50 +463,6 @@ private extension ChatVC {
         
         view.addSubview(inputBar)
         NSLayoutConstraint.activate(constraints)
-    }
-    
-    func setupFooterBar() {
-        footerBar.backgroundColor = .secondaryBackground
-        footerBar.translatesAutoresizingMaskIntoConstraints = false
-        footerBarBotConstraint = footerBar.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        let constraints = [
-            footerBar.leftAnchor.constraint(equalTo: view.leftAnchor),
-            footerBar.rightAnchor.constraint(equalTo: view.rightAnchor),
-            footerBarBotConstraint,
-            footerBar.heightAnchor.constraint(equalToConstant: 52 + view.safeAreaBottom)]
-        
-        view.addSubview(footerBar)
-        NSLayoutConstraint.activate(constraints)
-        
-        inputField.delegate = self
-        inputField.font = .font(ofSize: 17, weight: .medium)
-        inputField.textColor = .primaryLightText
-        inputField.layer.cornerRadius = 15
-        inputField.backgroundColor = .primaryBackground
-        inputField.keyboardAppearance = .dark
-        inputField.layer.borderColor = UIColor.init(hex: "#555555").cgColor
-        inputField.layer.borderWidth = 1
-        inputField.translatesAutoresizingMaskIntoConstraints = false
-        let fieldConstraints = [
-            inputField.leftAnchor.constraint(equalTo: footerBar.leftAnchor, constant: 16),
-            inputField.topAnchor.constraint(equalTo: footerBar.topAnchor, constant: 8),
-            inputField.heightAnchor.constraint(equalToConstant: 36)]
-        
-        footerBar.addSubview(inputField)
-        NSLayoutConstraint.activate(fieldConstraints)
-        
-        sendButton.isEnabled = false
-        sendButton.image = UIImage(named: "send@16pt")
-        sendButton.translatesAutoresizingMaskIntoConstraints = false
-        let sendConstraints = [
-            sendButton.leftAnchor.constraint(equalTo: inputField.rightAnchor, constant: 16),
-            sendButton.topAnchor.constraint(equalTo: footerBar.topAnchor, constant: 8),
-            sendButton.rightAnchor.constraint(equalTo: footerBar.rightAnchor, constant: -16),
-            sendButton.heightAnchor.constraint(equalToConstant: 36),
-            sendButton.widthAnchor.constraint(equalToConstant: 36)]
-        
-        footerBar.addSubview(sendButton)
-        NSLayoutConstraint.activate(sendConstraints)
     }
     
     func setupChatCollection() {

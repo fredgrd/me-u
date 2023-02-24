@@ -100,10 +100,27 @@ extension MainController {
         self.pushViewController(authVC, animated: true)
     }
     
-    func goToHome() {
-        let homeVM = HomeVCViewModel(controller: self)
-        let homeVC = HomeVC(viewModel: homeVM)
-        self.pushViewController(homeVC, animated: true)
+    func goToHome(checkUNAuth: Bool = true) {
+        if !checkUNAuth {
+            let homeVM = HomeVCViewModel(controller: self)
+            let homeVC = HomeVC(viewModel: homeVM)
+            self.pushViewController(homeVC, animated: true)
+            return
+        }
+        
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            if settings.authorizationStatus == .authorized {
+                DispatchQueue.main.async {
+                    let homeVM = HomeVCViewModel(controller: self)
+                    let homeVC = HomeVC(viewModel: homeVM)
+                    self.pushViewController(homeVC, animated: true)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.goToAuthNotifications()
+                }
+            }
+        }
     }
     
     func goToProfile() {
@@ -116,5 +133,11 @@ extension MainController {
         let notificationsVM = NotificationsVCViewModel(controller: self)
         let notificationsVC = NotificationsVC(viewModel: notificationsVM)
         self.pushViewController(notificationsVC, animated: true)
+    }
+    
+    func goToAuthNotifications() {
+        let authNotificationsVM = AuthNotificationsVCViewModel(controller: self)
+        let authNotificationsVC = AuthNotificationsVC(viewModel: authNotificationsVM)
+        self.pushViewController(authNotificationsVC, animated: true)
     }
 }
