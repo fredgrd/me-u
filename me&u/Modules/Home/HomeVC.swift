@@ -65,29 +65,35 @@ class HomeVC: UIViewController {
     }
     
     private func bindUI() {
-        menu.userProfileButton.onClick.receive(on: RunLoop.main).sink { _ in
-            self.viewModel.controller.goToProfile()
+        menu.userProfileButton.onClick.receive(on: RunLoop.main).sink { [weak self] _ in
+            guard let self = self else { return }
+            self.viewModel.presentProfileVC(from: self)
         }.store(in: &bag)
         
-        menu.addFriendButton.onClick.receive(on: DispatchQueue.main).sink { _ in
+        menu.addFriendButton.onClick.receive(on: DispatchQueue.main).sink { [weak self] _ in
+            guard let self = self else { return }
             let friendsVM = FriendsVCViewModel(controller: self.viewModel.controller)
             let friendsVC = FriendsVC(viewModel: friendsVM)
             friendsVC.modalTransitionStyle = .coverVertical
             self.present(friendsVC, animated: true)
         }.store(in: &bag)
         
-        menu.userNotificationsButton.onClick.receive(on: RunLoop.main).sink { _ in
+        menu.userNotificationsButton.onClick.receive(on: RunLoop.main).sink { [weak self] _ in
+            guard let self = self else { return }
             self.viewModel.presentNotificationsVC(from: self)
         }.store(in: &bag)
         
-        viewModel.controller.userManager.notifications.receive(on: RunLoop.main).sink { notifications in
+        viewModel.controller.userManager.notifications.receive(on: RunLoop.main).sink { [weak self] notifications in
+            guard let self = self else { return }
             let unreadCount = notifications.reduce(0) { partialResult, notification in
                 return partialResult + (notification.status == .sent ? 1 : 0)
             }
             self.menu.notificationCount = unreadCount
         }.store(in: &bag)
         
-        viewModel.controller.userManager.user.receive(on: RunLoop.main).sink { user in
+        viewModel.controller.userManager.user.receive(on: RunLoop.main).sink { [weak self] user in
+            guard let self = self else { return }
+            
             guard let user = user else {
                 fatalError("Failed to retrieve user")
             }
@@ -95,7 +101,9 @@ class HomeVC: UIViewController {
             self.updateSnapshot(withUser: user)
         }.store(in: &bag)
         
-        DeeplinkManager.shared.urlToOpen.receive(on: RunLoop.main).sink { info in
+        DeeplinkManager.shared.urlToOpen.receive(on: RunLoop.main).sink { [weak self] info in
+            guard let self = self else { return }
+            
             guard let info = info else {
                 return
             }

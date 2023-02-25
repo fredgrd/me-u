@@ -19,7 +19,7 @@ class ProfileVC: UIViewController {
     private var bag = Set<AnyCancellable>()
     
     // Subviews
-    private let headerBar = UIView()
+    private let draggableBar = UIView()
     private let scrollView = UIScrollView()
     private let scrollViewContent = UIView()
     private let goBackButton = IconButton()
@@ -167,45 +167,45 @@ extension ProfileVC: UIImagePickerControllerDelegate, UINavigationControllerDele
 // MARK: - UISetup
 private extension ProfileVC {
     func setupUI() {
+        view.layer.cornerRadius = 40
         view.backgroundColor = .primaryBackground
         
-        setupHeaderBar()
+        setupDraggableBar()
         setupScrollView()
         setupUserAvatar()
         setupSettings()
     }
     
-    func setupHeaderBar() {
-        headerBar.backgroundColor = .primaryBackground
-        headerBar.translatesAutoresizingMaskIntoConstraints = false
+    func setupDraggableBar() {
+        draggableBar.backgroundColor = nil
+        draggableBar.translatesAutoresizingMaskIntoConstraints = false
         let constraints = [
-            headerBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            headerBar.rightAnchor.constraint(equalTo: view.rightAnchor),
-            headerBar.leftAnchor.constraint(equalTo: view.leftAnchor),
-            headerBar.heightAnchor.constraint(equalToConstant: 44)]
+            draggableBar.leftAnchor.constraint(equalTo: view.leftAnchor),
+            draggableBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            draggableBar.rightAnchor.constraint(equalTo: view.rightAnchor),
+            draggableBar.heightAnchor.constraint(equalToConstant: 30)]
         
-        view.addSubview(headerBar)
+        view.addSubview(draggableBar)
         NSLayoutConstraint.activate(constraints)
         
-        goBackButton.image = UIImage(named: "rx-arrow@24pt")
-        goBackButton.tintColor = .primaryLightText
-        goBackButton.backgroundColor = .secondaryBackground
-        goBackButton.layer.cornerRadius = 22
-        goBackButton.translatesAutoresizingMaskIntoConstraints = false
-        let buttonConstraints = [
-            goBackButton.rightAnchor.constraint(equalTo: headerBar.rightAnchor, constant: -16),
-            goBackButton.centerYAnchor.constraint(equalTo: headerBar.centerYAnchor),
-            goBackButton.heightAnchor.constraint(equalToConstant: 44),
-            goBackButton.widthAnchor.constraint(equalToConstant: 44)]
+        let dragbar = UIView()
+        dragbar.layer.cornerRadius = 2.5
+        dragbar.backgroundColor = .secondaryDarkText
+        dragbar.translatesAutoresizingMaskIntoConstraints = false
+        let dragbarConstraints = [
+            dragbar.centerXAnchor.constraint(equalTo: draggableBar.centerXAnchor),
+            dragbar.centerYAnchor.constraint(equalTo: draggableBar.centerYAnchor),
+            dragbar.heightAnchor.constraint(equalToConstant: 5),
+            dragbar.widthAnchor.constraint(equalToConstant: 34)]
         
-        headerBar.addSubview(goBackButton)
-        NSLayoutConstraint.activate(buttonConstraints)
+        view.addSubview(dragbar)
+        NSLayoutConstraint.activate(dragbarConstraints)
     }
     
     func setupScrollView() {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         let scrollConstraints = [
-            scrollView.topAnchor.constraint(equalTo: headerBar.bottomAnchor),
+            scrollView.topAnchor.constraint(equalTo: draggableBar.bottomAnchor),
             scrollView.rightAnchor.constraint(equalTo: view.rightAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             scrollView.leftAnchor.constraint(equalTo: view.leftAnchor)]

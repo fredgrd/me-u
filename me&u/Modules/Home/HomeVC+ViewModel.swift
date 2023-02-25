@@ -33,9 +33,16 @@ class HomeVCViewModel {
         }
     }
     
+    func presentProfileVC(from vc: HomeVC) {
+        let viewModel = ProfileVCViewModel(controller: controller)
+        let profileVC = ProfileVC(viewModel: viewModel)
+        vc.present(profileVC, animated: true)
+    }
+    
     func presentNotificationsVC(from vc: HomeVC) {
         let viewModel = NotificationsVCViewModel(controller: controller)
         let notificationsVC = NotificationsVC(viewModel: viewModel)
         vc.present(notificationsVC, animated: true)
     }
+
 }
