@@ -22,6 +22,9 @@ Add your friends and create rooms to chat with them about what is going on in yo
 #### Message + Notification
 ![message](message.gif)
 
+#### Real-time Chat
+![realtime](realtime.gif)
+
 ## Technologies
 - Swift (UIKit)
 - WebSockets (ws on BE and native implementation on the FE)
