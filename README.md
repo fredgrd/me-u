@@ -10,14 +10,14 @@ Add your friends and create rooms to chat with them about what is going on in yo
 
 ### Auth Flow
 
-#### Test
-![test](test.gif)
-
 #### Signup
 ![signup](signup.gif)
 
 #### Login
 ![login](login.gif)
+
+#### Message + Notification
+![message](message.gif)
 
 ## Technologies
 - Swift (UIKit)
