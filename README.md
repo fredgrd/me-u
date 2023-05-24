@@ -1,3 +1,5 @@
+![logo](me&u_logo.gif)
+
 # Me&u
 Unleash limitless conversations with friends.
 
