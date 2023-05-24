@@ -16,6 +16,9 @@ Add your friends and create rooms to chat with them about what is going on in yo
 #### Login
 ![login](login.gif)
 
+#### Friend Request
+![request](request.gif)
+
 #### Message + Notification
 ![message](message.gif)
 
