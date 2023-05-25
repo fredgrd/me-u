@@ -3,6 +3,10 @@
 # Me&u
 Me&u was developed to gain more experience in using the Swift language, especially in the context of live communications between clients. 
 
+The project is divided into two repositories:
+- [me-u](https://github.com/fredgrd/me-u/) – User-facing iOS app
+- [api-meu](https://github.com/fredgrd/api-meu) – Backend powering the real-time comms between clients
+
 ## Introduction
 Add your friends and create rooms to chat with them about what is going on in your life. Built with Swift and powered by a NodeJS backend, me&u uses a native implementation of WebSockets to enable you to chat with your friends in a whatsapp meets boards type of environment. 
 
