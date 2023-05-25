@@ -1,4 +1,4 @@
-![logo](me&u_logo.png)
+![logo](showcase/me&u_logo.png)
 
 # Me&u
 Me&u was developed to enable small group of friends to engage in conversations on everyday topics. The app was heavily inspired by Locket, and borrows some of its functionality from Whatsapp groups. 
@@ -10,7 +10,7 @@ The project is divided into two repositories:
 ## Introduction
 Add your friends and create rooms to chat with them about what is going on in your life. Built with **Swift** and powered by a **Node.js** backend, me&u uses a native implementation of WebSockets to enable you to chat with your friends in a whatsapp meets boards type of environment. 
 
-![message](message.gif)
+![message](showcase/message.gif)
 
 ## Technologies
 
@@ -34,16 +34,16 @@ Add your friends and create rooms to chat with them about what is going on in yo
 ### Auth Flow
 
 #### Signup
-![signup](signup.gif)
+![signup](showcase/signup.gif)
 
 #### Login
-![login](login.gif)
+![login](showcase/login.gif)
 
 #### Friend Request
-![request](f_request.gif)
+![request](showcase/f_request.gif)
 
 #### Message + Notification
-![message](message.gif)
+![message](showcase/message.gif)
 
 #### Real-time Chat
-![realtime](realtime.gif)
+![realtime](showcase/realtime.gif)
