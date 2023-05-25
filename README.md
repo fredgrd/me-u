@@ -1,7 +1,7 @@
 ![logo](me&u_logo.png)
 
 # Me&u
-Me&u was developed to gain more experience in using the Swift language, especially in the context of live communications between clients. 
+Me&u was developed to enable small group of friends to engage in conversations on everyday topics. The app was heavily inspired by Locket, and borrows some of its functionality from Whatsapp groups. 
 
 The project is divided into two repositories:
 - [me-u](https://github.com/fredgrd/me-u/) – User-facing iOS app
