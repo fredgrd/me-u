@@ -8,7 +8,24 @@ The project is divided into two repositories:
 - [api-meu](https://github.com/fredgrd/api-meu) – Backend powering the real-time comms between clients
 
 ## Introduction
-Add your friends and create rooms to chat with them about what is going on in your life. Built with Swift and powered by a NodeJS backend, me&u uses a native implementation of WebSockets to enable you to chat with your friends in a whatsapp meets boards type of environment. 
+Add your friends and create rooms to chat with them about what is going on in your life. Built with Swift and powered by a Node.js backend, me&u uses a native implementation of WebSockets to enable you to chat with your friends in a whatsapp meets boards type of environment. 
+
+## Technologies
+
+### Backend
+- Node.js
+- Express
+- WebSocket (ws)
+- MongoDB Atlas
+- Mongoose
+- AWS (S3 + Elastic Beanstalk)
+- Firebase Cloud Messaging 
+- Twilio
+
+### Frontend 
+- Swift (UIkit)
+- WebSocket (URLSessionWebSocketTask)
+- Firebase Cloud Messaging (Notifications)
 
 ## Flows
 
@@ -28,13 +45,3 @@ Add your friends and create rooms to chat with them about what is going on in yo
 
 #### Real-time Chat
 ![realtime](realtime.gif)
-
-## Technologies
-- Swift (UIKit)
-- WebSockets (ws on BE and native implementation on the FE)
-- NodeJS + Express + Ws (Backend)
-- MongoDB (Mongoose)
-- Twilio Verify (Auth)
-- Firebase Cloud Messaging (Chat notifications)
-- AWS S3 (Media storage)
-- AWS Elastic Bean (Backend hosting)
